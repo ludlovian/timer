@@ -1,6 +1,6 @@
 {
   "name": "timer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Simple timer class",
   "main": "src/index.mjs",
   "exports": {
