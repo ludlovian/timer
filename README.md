@@ -9,7 +9,7 @@ Does nothing more than wrap the standard API but keeps hold of the timeout entit
 
 Creates a Timer which will fire at a certain date/time
 
-### Timer.from(ms) => Timer
+### Timer.after(ms) => Timer
 
 Creates a Timer which will fire in `ms` millisseconds time
 
@@ -25,6 +25,6 @@ Sets the function to be called when it fires. Returns itself for chaining.
 
 Cancels the timer. Returns itself for chaining. Idempotent.
 
-### .at, .from, .every
+### .at, .after, .every
 
 Reconfigures the current timer
