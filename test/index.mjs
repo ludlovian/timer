@@ -95,4 +95,14 @@ test('.set ', async () => {
   assert.is(t.active, false, 'timer has stopped')
 })
 
+test('chaining', () => {
+  const fn = () => null
+  const t = new Timer()
+  const t2 = t
+    .set({ after: 100, fn })
+    .fire()
+    .cancel()
+  assert.is(t, t2)
+})
+
 test.run()

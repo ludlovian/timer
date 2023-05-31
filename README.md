@@ -37,9 +37,9 @@ Returns itself for chaining.
 
 Cancels the timer. Returns itself for chaining. Idempotent.
 
-### .fire()
+### .fire() = Timer
 
-Manually fire the timer right now.
+Manually fire the timer right now. Returns itself for chaining.
 
 If it is not a `repeats`, then the underlying timer is cancelled.
 
@@ -57,5 +57,5 @@ When is the timer due. Set to `null` for `.repeats`
 
 ### .left() => ms
 
-How many milliseconds are left until `.due`. Set to `0` if already iun the
+How many milliseconds are left until `.due`. Set to `0` if already in the
 past, or a repeater.
