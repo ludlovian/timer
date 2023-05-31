@@ -35,7 +35,7 @@ test('Timer.every', async () => {
   await delay(125)
   assert.is(count, 2, 'timer has fired twice')
   assert.is(t.active, true, 'timer is still going')
-  assert.is(t.isInterval, true, 'timer is an interval')
+  assert.is(t.repeats, true, 'timer is an interval')
   t.cancel()
 
   assert.is(t.active, false, 'timer no longer active')
@@ -49,6 +49,50 @@ test('.cancel timeout', async () => {
   await delay(100)
   assert.is(fired, false, 'timer has not fired')
   assert.is(t.active, false, 'timer no longer active')
+})
+
+test('.due & .left', async () => {
+  let d = new Date(Date.now() + 100)
+
+  const t = Timer.every(500)
+  let left = t.left()
+  assert.is(t.due, null)
+  assert.is(left, 0)
+
+  t.set({ at: d })
+  left = t.left()
+  assert.is(t.due, d)
+  assert.ok(left > 0 && left <= 100)
+
+  d = new Date(Date.now() - 100)
+  t.at(d)
+  left = t.left()
+  assert.is(t.due, d)
+  assert.is(left, 0)
+
+  t.cancel()
+})
+
+test('.set ', async () => {
+  const t = new Timer()
+  let fired = false
+  t.set({ fn: () => (fired = true), after: 50 })
+
+  await delay(100)
+
+  assert.is(fired, true, 'timer has fired')
+
+  fired = false
+  t.set({ every: 40 })
+  assert.is(t.repeats, true, 'timer is an interval')
+
+  await delay(50)
+
+  assert.is(fired, true, 'timer has fired')
+  assert.is(t.active, true, 'timer still going')
+
+  t.cancel()
+  assert.is(t.active, false, 'timer has stopped')
 })
 
 test.run()

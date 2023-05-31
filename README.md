@@ -5,26 +5,57 @@ Does nothing more than wrap the standard API but keeps hold of the timeout entit
 
 ## Timer
 
+### new Timer()
+
+Creates a blank, idle timer.
+
+### .at(datetime) => Timer
 ### Timer.at(datetime) => Timer
 
-Creates a Timer which will fire at a certain date/time
+Creates or resets the timer to fire at `datetime`
 
+### .after(ms) => Timer
 ### Timer.after(ms) => Timer
 
-Creates a Timer which will fire in `ms` millisseconds time
+Creates or resets the timer to fire after `ms` millisseconds
 
+### .every(ms) => Timer
 ### Timer.every(ms) => Timer
 
-Creates a Timer which will fire every `ms` milliseconds
+Creates or resets the timer to fire every `ms` milliseconds
 
-### .call(fn)
+### .call(fn) => Timer
 
 Sets the function to be called when it fires. Returns itself for chaining.
 
-### .cancel()
+### .set({ fn, at, after, every }) => Timer
+
+Reconfigure the timer. Obviously `at`, `after` and `every` are mutually exclusive!
+Returns itself for chaining.
+
+### .cancel() => Timer
 
 Cancels the timer. Returns itself for chaining. Idempotent.
 
-### .at, .after, .every
+### .fire()
 
-Reconfigures the current timer
+Manually fire the timer right now.
+
+If it is not a `repeats`, then the underlying timer is cancelled.
+
+### .repeats => Boolean
+
+Is this a repeating `setInterval` timer or a one-off `setTimeout` kind
+
+### .active => Boolean
+
+Is the timer currently active.
+
+### .due => Date
+
+When is the timer due. Set to `null` for `.repeats`
+
+### .left() => ms
+
+How many milliseconds are left until `.due`. Set to `0` if already iun the
+past, or a repeater.
