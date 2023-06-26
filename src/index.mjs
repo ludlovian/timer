@@ -83,8 +83,8 @@ export default class Timer {
   }
 
   _fire () {
-    if (this.fn) this.fn()
     if (this._due) this.cancel()
+    if (this.fn) this.fn()
     return this
   }
 }

@@ -105,4 +105,28 @@ test('chaining', () => {
   assert.is(t, t2)
 })
 
+test('re-arm in fire function', async () => {
+  const tm = new Timer()
+  let called = false
+
+  assert.is(tm.active, false)
+
+  tm.set({
+    after: 30,
+    fn: () => {
+      called = true
+      tm.after(30)
+    }
+  })
+
+  assert.is(tm.active, true, 'timer is initially armed')
+
+  await delay(40)
+
+  assert.is(called, true, 'timer has called')
+  assert.is(tm.active, true, 'timer has rearmed')
+
+  tm.cancel()
+})
+
 test.run()
