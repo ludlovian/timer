@@ -5,47 +5,38 @@ Does nothing more than wrap the standard API but keeps hold of the timeout entit
 
 ## Timer
 
-### new Timer()
+### new Timer(config)
 
-Creates a blank, idle timer.
+Creates and configures a new timer.
 
-### .at(datetime) => Timer
-### Timer.at(datetime) => Timer
+`config` should be an object with the following:
+- `ms`: the delay after which the function should be called
+- `fn`: the function to call
+- `repeat`: if truthy, the timer should repeat every `ms`
 
-Creates or resets the timer to fire at `datetime`
+It can also accept the legacy properties:
+- `after`: the `ms` value and sets `repeat` to `false`
+- `every`: the `ms` value and sets `repeat` to `true`
 
-### .after(ms) => Timer
-### Timer.after(ms) => Timer
+### .ms => Number
 
-Creates or resets the timer to fire after `ms` millisseconds
+Enumerable & read only. The current millisecond setting
 
-### .every(ms) => Timer
-### Timer.every(ms) => Timer
+### .fn => Function
 
-Creates or resets the timer to fire every `ms` milliseconds
+Enumerable & read only. The current function to call
 
-### .call(fn) => Timer
+### .repeat
 
-Sets the function to be called when it fires. Returns itself for chaining.
-
-### .set({ fn, at, after, every }) => Timer
-
-Reconfigure the timer. Obviously `at`, `after` and `every` are mutually exclusive!
-Returns itself for chaining.
+Enumerable & read only. The current `repeat` setting
 
 ### .cancel() => Timer
 
 Cancels the timer. Returns itself for chaining. Idempotent.
 
-### .fire() = Timer
+### .refresh() => Timer
 
-Manually fire the timer right now. Returns itself for chaining.
-
-If it is not a `repeats`, then the underlying timer is cancelled.
-
-### .repeats => Boolean
-
-Is this a repeating `setInterval` timer or a one-off `setTimeout` kind
+Restarts the timer. Returns itself
 
 ### .active => Boolean
 
@@ -53,9 +44,9 @@ Is the timer currently active.
 
 ### .due => Date
 
-When is the timer due. Set to `null` for `.repeats`
+When is the timer next due
 
-### .left() => ms
+### .started => Date
 
-How many milliseconds are left until `.due`. Set to `0` if already in the
-past, or a repeater.
+When was the timer last started
+
