@@ -142,6 +142,44 @@ test('Timer', async t => {
     assert.strictEqual(tm.active, false, 'timer is no longer active')
   })
 
+  await t.test('cancel in callback', async t => {
+    const fn = t.mock.fn(() => tm.cancel())
+
+    const tm = new Timer({ ms: 30, repeat: true, fn })
+
+    assert.strictEqual(tm.active, true, 'timer is active')
+    await delay(45)
+
+    assert.strictEqual(fn.mock.callCount(), 1, 'function has been called')
+    assert.strictEqual(tm.active, false, 'timer has stopped after cancel in callback')
+  })
+
+  await t.test('refresh in callback', async t => {
+    let shouldRefresh = true
+    const fn = t.mock.fn(() => {
+      if (shouldRefresh) tm.refresh()
+    })
+
+    const tm = new Timer({ ms: 30, repeat: false, fn })
+    try {
+      assert.strictEqual(tm.active, true, 'timer is initially active')
+
+      await delay(45)
+
+      assert.strictEqual(fn.mock.callCount(), 1, 'function has been called')
+      assert.strictEqual(tm.active, true, 'timer is active after refresh')
+
+      shouldRefresh = false
+
+      await delay(60)
+
+      assert.strictEqual(fn.mock.callCount(), 2, 'function has been called again')
+      assert.strictEqual(tm.active, false, 'timer is no longer active')
+    } finally {
+      tm.cancel()
+    }
+  })
+
   t.test('Errors in construction', t => {
     assert.throws(() => new Timer(), Error, 'No configuration provided')
 
