@@ -142,6 +142,29 @@ test('Timer', async t => {
     assert.strictEqual(tm.active, false, 'timer is no longer active')
   })
 
+  await t.test('refresh during timeout wait', async t => {
+    const fn = t.mock.fn()
+
+    const tm = new Timer({ ms: 30, fn })
+
+    await delay(15)
+
+    assert.strictEqual(fn.mock.callCount(), 0, 'no calls yet')
+    assert.strictEqual(tm.active, true, 'Timer is initially active')
+
+    tm.refresh()
+
+    assert.ok(isClose(+tm.started, Date.now()), 'started has been reset')
+
+    await delay(20)
+    assert.strictEqual(fn.mock.callCount(), 0, 'still no calls yet')
+    assert.strictEqual(tm.active, true, 'Timer is still active')
+
+    await delay(25)
+    assert.strictEqual(fn.mock.callCount(), 1, 'one call made')
+    assert.strictEqual(tm.active, false, 'Timer is now inactive')
+  })
+
   await t.test('cancel in callback', async t => {
     const fn = t.mock.fn(() => tm.cancel())
 

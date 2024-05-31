@@ -69,7 +69,6 @@ export default class Timer {
   }
 
   refresh () {
-    this.cancel()
     this.#start()
     return this
   }
