@@ -1,55 +1,48 @@
 import util from 'node:util'
 
 export default class Timer {
+  // Configuration
   #tm = null
   #ms = 0
   #fn = undefined
-  #active = false
   #repeat = false
+
+  // State
+  #active = false
   #started = undefined
 
-  constructor (config = {}) {
+  constructor ({ ms, repeat, fn, after, every }) {
     // legacy props
-    if ('after' in config) {
-      config.ms = config.after
-      config.repeat = false
-    }
-    if ('every' in config) {
-      config.ms = config.every
-      config.repeat = true
+    if (!ms && after !== undefined) {
+      ms = after
+      repeat = false
+    } else if (!ms && every !== undefined) {
+      ms = every
+      repeat = true
     }
 
     // validation
-    this.#ms = +config.ms
-    if (this.#ms * 0 !== 0) throw errInvalidDelay()
+    if (typeof fn !== 'function') throw errNoFunctionSupplied()
+    ms = Math.floor(ms)
+    if (isNaN(ms)) throw errInvalidDelay()
 
-    this.#repeat = !!config.repeat
+    this.#fn = fn
+    this.#ms = ms
+    this.#repeat = !!repeat
 
-    this.#fn = config.fn
-    if (typeof this.#fn !== 'function') throw errNoFunctionSupplied()
-
-    const enumerable = true
-    const configurable = true
-    const defs = {
-      ms: { enumerable, configurable, get: () => this.#ms },
-      repeat: { enumerable, configurable, get: () => this.#repeat },
-      fn: { enumerable, configurable, get: () => this.#fn }
-    }
-    Object.defineProperties(this, defs)
-
+    this.#addProperties()
     this.#start()
   }
 
   /* c8 ignore start */
-  [util.inspect.custom] (depth, options, inspect) {
+  [util.inspect.custom] (depth, opts, inspect) {
     if (depth < 0) {
-      return options.stylize('[Timer]', 'date')
+      return opts.stylize('[Timer]', 'date')
     }
     return [
-      'Timer { ms: ',
-      options.stylize(this.ms, 'number'),
-      ', repeat: ',
-      options.stylize(this.repeat, 'boolean'),
+      'Timer { ',
+      `ms: ${opts.stylize(this.ms, 'number')}, `,
+      `repeat: ${opts.stylize(this.repeat, 'boolean')}`,
       ' }'
     ].join('')
   }
@@ -81,6 +74,17 @@ export default class Timer {
     return this
   }
 
+  #addProperties () {
+    const enumerable = true
+    const configurable = true
+    const defs = {
+      ms: { enumerable, configurable, get: () => this.#ms },
+      repeat: { enumerable, configurable, get: () => this.#repeat },
+      fn: { enumerable, configurable, get: () => this.#fn }
+    }
+    Object.defineProperties(this, defs)
+  }
+
   #start () {
     this.#started = Date.now()
     this.#active = true
@@ -92,12 +96,14 @@ export default class Timer {
   }
 
   #fire () {
-    this.#fn()
+    // Configuration is all done first, before the callback is called
+    // to allow the callback to adjust it
     if (this.#repeat) {
       this.#start()
     } else {
       this.#active = false
     }
+    this.#fn()
   }
 }
 

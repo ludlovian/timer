@@ -151,7 +151,11 @@ test('Timer', async t => {
     await delay(45)
 
     assert.strictEqual(fn.mock.callCount(), 1, 'function has been called')
-    assert.strictEqual(tm.active, false, 'timer has stopped after cancel in callback')
+    assert.strictEqual(
+      tm.active,
+      false,
+      'timer has stopped after cancel in callback'
+    )
   })
 
   await t.test('refresh in callback', async t => {
@@ -171,9 +175,13 @@ test('Timer', async t => {
 
       shouldRefresh = false
 
-      await delay(60)
+      await delay(30)
 
-      assert.strictEqual(fn.mock.callCount(), 2, 'function has been called again')
+      assert.strictEqual(
+        fn.mock.callCount(),
+        2,
+        'function has been called again'
+      )
       assert.strictEqual(tm.active, false, 'timer is no longer active')
     } finally {
       tm.cancel()
