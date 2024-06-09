@@ -1,4 +1,4 @@
-import test from 'node:test'
+import { suite, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { setTimeout as delay } from 'node:timers/promises'
 
@@ -8,8 +8,8 @@ function isClose (a, b, tolerance = 2) {
   return Math.abs(b - a) <= tolerance
 }
 
-test('Timer', async t => {
-  t.test('basic construction', t => {
+suite('Timer', async () => {
+  test('basic construction', () => {
     const fn = () => {}
     const ms = 100
 
@@ -24,7 +24,7 @@ test('Timer', async t => {
     tm.cancel()
   })
 
-  await t.test('Fire after a time', async t => {
+  test('Fire after a time', async t => {
     const fn = t.mock.fn()
 
     const tm = new Timer({ ms: 30, fn })
@@ -44,7 +44,7 @@ test('Timer', async t => {
     assert.strictEqual(tm.due, undefined, 'due time is cleared')
   })
 
-  t.test('Legacy construction', t => {
+  test('Legacy construction', t => {
     const fn = t.mock.fn()
 
     let tm = new Timer({ after: 30, fn })
@@ -62,7 +62,7 @@ test('Timer', async t => {
     tm.cancel()
   })
 
-  await t.test('Repeat timer', async t => {
+  test('Repeat timer', async t => {
     const fn = t.mock.fn()
 
     const tm = new Timer({ ms: 30, repeat: true, fn })
@@ -82,7 +82,7 @@ test('Timer', async t => {
     assert.strictEqual(tm.active, false, 'timer is no longer active')
   })
 
-  await t.test('Cancel after starting', async t => {
+  test('Cancel after starting', async t => {
     const fn = t.mock.fn()
 
     const tm = new Timer({ ms: 30, fn })
@@ -99,7 +99,7 @@ test('Timer', async t => {
     assert.strictEqual(fn.mock.callCount(), 0, 'no call made iafter cancel')
   })
 
-  await t.test('Refresh after cancel', async t => {
+  test('Refresh after cancel', async t => {
     const fn = t.mock.fn()
 
     const tm = new Timer({ ms: 30, fn })
@@ -121,7 +121,7 @@ test('Timer', async t => {
     assert.strictEqual(tm.active, false, 'timer is no longer active')
   })
 
-  await t.test('Refresh after firing', async t => {
+  test('Refresh after firing', async t => {
     const fn = t.mock.fn()
 
     const tm = new Timer({ ms: 30, fn })
@@ -142,7 +142,7 @@ test('Timer', async t => {
     assert.strictEqual(tm.active, false, 'timer is no longer active')
   })
 
-  await t.test('refresh during timeout wait', async t => {
+  test('refresh during timeout wait', async t => {
     const fn = t.mock.fn()
 
     const tm = new Timer({ ms: 30, fn })
@@ -165,7 +165,7 @@ test('Timer', async t => {
     assert.strictEqual(tm.active, false, 'Timer is now inactive')
   })
 
-  await t.test('cancel in callback', async t => {
+  test('cancel in callback', async t => {
     const fn = t.mock.fn(() => tm.cancel())
 
     const tm = new Timer({ ms: 30, repeat: true, fn })
@@ -181,7 +181,7 @@ test('Timer', async t => {
     )
   })
 
-  await t.test('refresh in callback', async t => {
+  test('refresh in callback', async t => {
     let shouldRefresh = true
     const fn = t.mock.fn(() => {
       if (shouldRefresh) tm.refresh()
@@ -211,7 +211,7 @@ test('Timer', async t => {
     }
   })
 
-  t.test('Errors in construction', t => {
+  test('Errors in construction', t => {
     assert.throws(() => new Timer(), Error, 'No configuration provided')
 
     assert.throws(
@@ -232,74 +232,92 @@ test('Timer', async t => {
       'Bad delay period'
     )
   })
-})
 
-/*
-test('.cancel timeout', async () => {
-  let fired = false
-  const t = Timer.after(50)
-    .call(() => (fired = true))
-    .cancel()
-  await delay(100)
-  assert.is(fired, false, 'timer has not fired')
-  assert.is(t.active, false, 'timer no longer active')
-})
+  suite('when', () => {
+    test('basic when on timeout', async t => {
+      const fn = t.mock.fn()
+      const callback = t.mock.fn()
+      const tm = new Timer({ ms: 30, fn })
 
-test('.set ', async () => {
-  const t = new Timer()
-  let fired = false
-  t.set({ fn: () => (fired = true), after: 50 })
+      const p = tm.when
+      p.then(callback)
 
-  await delay(100)
+      await delay(5)
 
-  assert.is(fired, true, 'timer has fired')
+      assert.ok(p instanceof Promise, '.when creates a promise')
+      assert.strictEqual(callback.mock.callCount(), 0, 'not initially resolved')
 
-  fired = false
-  t.set({ every: 40 })
-  assert.is(t.repeats, true, 'timer is an interval')
+      const p1 = tm.when
+      assert.strictEqual(p, p1, 'identical promise returned')
 
-  await delay(50)
+      await delay(40)
 
-  assert.is(fired, true, 'timer has fired')
-  assert.is(t.active, true, 'timer still going')
+      assert.strictEqual(
+        callback.mock.callCount(),
+        1,
+        'resolved on timer click'
+      )
+      callback.mock.resetCalls()
 
-  t.cancel()
-  assert.is(t.active, false, 'timer has stopped')
-})
+      const p2 = tm.when
+      assert.ok(p !== p2, '.when resets to a differnt promise')
+      p2.then(callback)
 
-test('chaining', () => {
-  const fn = () => null
-  const t = new Timer()
-  const t2 = t
-    .set({ after: 100, fn })
-    .fire()
-    .cancel()
-  assert.is(t, t2)
-})
+      await delay(5)
+      assert.strictEqual(
+        callback.mock.callCount(),
+        1,
+        '...which is already resolved'
+      )
 
-test('re-arm in fire function', async () => {
-  const tm = new Timer()
-  let called = false
+      tm.cancel()
+    })
 
-  assert.is(tm.active, false)
+    test('when on interval', async t => {
+      const fn = t.mock.fn()
+      const callback = t.mock.fn()
+      const tm = new Timer({ ms: 30, repeat: true, fn })
 
-  tm.set({
-    after: 30,
-    fn: () => {
-      called = true
-      tm.after(30)
-    }
+      const p = tm.when
+      p.then(callback)
+
+      await delay(5)
+
+      assert.strictEqual(callback.mock.callCount(), 0, 'not initially resolved')
+
+      await delay(40)
+      assert.strictEqual(
+        callback.mock.callCount(),
+        1,
+        'resolved on timer click'
+      )
+      assert.strictEqual(fn.mock.callCount(), 1, 'one call made')
+      callback.mock.resetCalls()
+
+      const p1 = tm.when
+      assert.ok(p1 !== p, 'new promise created')
+      p1.then(callback)
+
+      await delay(30)
+      assert.strictEqual(fn.mock.callCount(), 2, 'two calls made')
+      assert.strictEqual(
+        callback.mock.callCount(),
+        1,
+        'resolved on timer click'
+      )
+      callback.mock.resetCalls()
+
+      tm.cancel()
+
+      const p2 = tm.when
+      p2.then(callback)
+
+      await delay(5)
+      assert.strictEqual(
+        callback.mock.callCount(),
+        1,
+        'ready resolved when inactive'
+      )
+    })
   })
-
-  assert.is(tm.active, true, 'timer is initially armed')
-
-  await delay(40)
-
-  assert.is(called, true, 'timer has called')
-  assert.is(tm.active, true, 'timer has rearmed')
-
-  tm.cancel()
 })
-
-test.run()
-*/

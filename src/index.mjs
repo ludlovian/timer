@@ -10,6 +10,8 @@ export default class Timer {
   // State
   #active = false
   #started = undefined
+  #when
+  #whenResolve
 
   constructor ({ ms, repeat, fn, after, every }) {
     // legacy props
@@ -60,10 +62,22 @@ export default class Timer {
     return this.#active ? new Date(this.#started + this.#ms) : undefined
   }
 
+  get when () {
+    // if we've got one, return it
+    if (this.#when) return this.#when
+
+    // if not active, return a resolved one
+    if (!this.active) return Promise.resolve()
+
+    // create a new one and return it
+    this.#when = new Promise(resolve => (this.#whenResolve = resolve))
+    return this.#when
+  }
+
   cancel () {
     if (!this.#active) return this
     clearTimeout(this.#tm)
-    this.#tm = undefined
+    this.#when = this.#whenResolve = this.#tm = undefined
     this.#active = false
     return this
   }
@@ -97,6 +111,8 @@ export default class Timer {
   #fire () {
     // Configuration is all done first, before the callback is called
     // to allow the callback to adjust it
+    if (this.#whenResolve) this.#whenResolve()
+    this.#whenResolve = this.#when = undefined
     if (this.#repeat) {
       this.#start()
     } else {

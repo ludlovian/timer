@@ -50,3 +50,8 @@ When is the timer next due
 
 When was the timer last started
 
+### .when => Promise
+
+Returns a promise which will be resolved on the next timer callback.
+
+If the timer is inactive, then you'll simply get a resolved one.
