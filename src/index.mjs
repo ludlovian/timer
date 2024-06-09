@@ -1,4 +1,4 @@
-import util from 'node:util'
+const customInspect = Symbol.for('nodejs.util.inspect.custom')
 
 export default class Timer {
   // Configuration
@@ -35,7 +35,7 @@ export default class Timer {
   }
 
   /* c8 ignore start */
-  [util.inspect.custom] (depth, opts, inspect) {
+  [customInspect] (depth, opts, inspect) {
     if (depth < 0) {
       return opts.stylize('[Timer]', 'date')
     }
