@@ -1,5 +1,5 @@
 {
-  "name": "timer",
+  "name": "@ludlovian/timer",
   "version": "2.1.0",
   "description": "Simple timer class",
   "main": "src/index.mjs",
