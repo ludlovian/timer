@@ -1,8 +1,4 @@
 const customInspect = Symbol.for('nodejs.util.inspect.custom')
-/* c8 ignore next */
-const isBrowser = typeof window !== 'undefined' && !!window?.document
-// const isBrowser = true
-
 
 export default class Timer {
   // Configuration
@@ -12,7 +8,6 @@ export default class Timer {
   #repeat = false
 
   // State
-  #active = false
   #started = undefined
   #when
   #whenResolve
@@ -55,15 +50,15 @@ export default class Timer {
   /* c8 ignore stop */
 
   get active () {
-    return this.#active
+    return !!this.#tm
   }
 
   get started () {
-    return this.#active ? new Date(this.#started) : undefined
+    return this.active ? new Date(this.#started) : undefined
   }
 
   get due () {
-    return this.#active ? new Date(this.#started + this.#ms) : undefined
+    return this.active ? new Date(this.#started + this.#ms) : undefined
   }
 
   get when () {
@@ -78,11 +73,13 @@ export default class Timer {
     return this.#when
   }
 
+  #clear () {
+    this.#tm = this.#when = this.#whenResolve = undefined
+  }
+
   cancel () {
-    if (!this.#active) return this
-    clearTimeout(this.#tm)
-    this.#when = this.#whenResolve = this.#tm = undefined
-    this.#active = false
+    if (this.#tm) clearTimeout(this.#tm)
+    this.#clear()
     return this
   }
 
@@ -103,27 +100,17 @@ export default class Timer {
   }
 
   #start () {
+    this.cancel()
     this.#started = Date.now()
-    /* c8 ignore next */
-    if (isBrowser) this.cancel()
-    this.#active = true
-    if (this.#tm) {
-      this.#tm.refresh()
-    } else {
-      this.#tm = setTimeout(this.#fire.bind(this), this.#ms)
-    }
+    this.#tm = setTimeout(this.#fire.bind(this), this.#ms)
   }
 
   #fire () {
     // Configuration is all done first, before the callback is called
     // to allow the callback to adjust it
     if (this.#whenResolve) this.#whenResolve()
-    this.#whenResolve = this.#when = undefined
-    if (this.#repeat) {
-      this.#start()
-    } else {
-      this.#active = false
-    }
+    this.#clear()
+    if (this.#repeat) this.#start()
     this.#fn()
   }
 }
