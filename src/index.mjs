@@ -1,4 +1,8 @@
 const customInspect = Symbol.for('nodejs.util.inspect.custom')
+/* c8 ignore next */
+const isBrowser = typeof window !== 'undefined' && !!window?.document
+// const isBrowser = true
+
 
 export default class Timer {
   // Configuration
@@ -100,6 +104,8 @@ export default class Timer {
 
   #start () {
     this.#started = Date.now()
+    /* c8 ignore next */
+    if (isBrowser) this.cancel()
     this.#active = true
     if (this.#tm) {
       this.#tm.refresh()
