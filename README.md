@@ -13,10 +13,17 @@ Creates and configures a new timer.
 - `ms`: the delay after which the function should be called
 - `fn`: the function to call
 - `repeat`: if truthy, the timer should repeat every `ms`
+- `inactive`: if truthy, it only configures without starting
 
-It can also accept the legacy properties:
+It can also accept the convenience properties:
 - `after`: the `ms` value and sets `repeat` to `false`
 - `every`: the `ms` value and sets `repeat` to `true`
+- `at`: sets the `ms` to fire at the given time, with `repeat` set to false
+
+### .set(config)
+Reconfigures the timer with new settings in the same way as `new Timer`
+
+Any active timer is cancelled.
 
 ### .ms => Number
 

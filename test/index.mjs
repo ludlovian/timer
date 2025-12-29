@@ -44,7 +44,7 @@ suite('Timer', async () => {
     assert.strictEqual(tm.due, undefined, 'due time is cleared')
   })
 
-  test('Legacy construction', t => {
+  test('Convenience construction', t => {
     const fn = t.mock.fn()
 
     let tm = new Timer({ after: 30, fn })
@@ -60,6 +60,11 @@ suite('Timer', async () => {
     assert.strictEqual(tm.repeat, true, 'repeat has been set correctly')
 
     tm.cancel()
+
+    const at = new Date(Date.now() + 35)
+    tm = new Timer({ at, fn })
+    assert.strictEqual(tm.ms, 35, 'ms has been set correctly')
+    assert.strictEqual(tm.repeat, false, 'repeat has been set correctly')
   })
 
   test('Repeat timer', async t => {
@@ -209,6 +214,22 @@ suite('Timer', async () => {
     } finally {
       tm.cancel()
     }
+  })
+
+  test('update after setting', t => {
+    const fn = t.mock.fn()
+
+    const tm = new Timer({ ms: 30, fn })
+    assert.strictEqual(tm.ms, 30, 'ms is set correctly')
+    assert.strictEqual(tm.active, true, 'timer has started')
+
+    tm.set({ ms: 35, fn })
+    assert.strictEqual(tm.ms, 35, 'ms is set correctly')
+    assert.strictEqual(tm.active, true, 'timer has started')
+
+    tm.set({ ms: 35, fn, inactive: true })
+    assert.strictEqual(tm.ms, 35, 'ms is set correctly')
+    assert.strictEqual(tm.active, false, 'timer has not started')
   })
 
   test('Errors in construction', t => {

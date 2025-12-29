@@ -12,14 +12,34 @@ export default class Timer {
   #when
   #whenResolve
 
-  constructor ({ ms, repeat, fn, after, every }) {
-    // legacy props
-    if (!ms && after !== undefined) {
-      ms = after
-      repeat = false
-    } else if (!ms && every !== undefined) {
-      ms = every
-      repeat = true
+  constructor (opts) {
+    this.#addProperties()
+    this.set(opts)
+  }
+
+  ['set'] ({
+    fn, //        the function to call
+    ms, //        how long until we call
+    repeat, //    should we repeat it
+    // convenience synonyms
+    after, //     one off after X ms
+    every, //     repeated every
+    at, //        at a certain time
+    inactive //   if set, do not start
+  }) {
+    this.cancel()
+
+    if (ms === undefined && repeat === undefined) {
+      if (after !== undefined) {
+        ms = after
+        repeat = false
+      } else if (every !== undefined) {
+        ms = every
+        repeat = true
+      } else if (at !== undefined) {
+        ms = Math.max(+at - Date.now(), 0)
+        repeat = false
+      }
     }
 
     // validation
@@ -31,8 +51,7 @@ export default class Timer {
     this.#ms = ms
     this.#repeat = !!repeat
 
-    this.#addProperties()
-    this.#start()
+    if (!inactive) this.#start()
   }
 
   /* c8 ignore start */
@@ -90,13 +109,11 @@ export default class Timer {
 
   #addProperties () {
     const enumerable = true
-    const configurable = true
-    const defs = {
-      ms: { enumerable, configurable, get: () => this.#ms },
-      repeat: { enumerable, configurable, get: () => this.#repeat },
-      fn: { enumerable, configurable, get: () => this.#fn }
-    }
-    Object.defineProperties(this, defs)
+    Object.defineProperties(this, {
+      ms: { enumerable, get: () => this.#ms },
+      repeat: { enumerable, get: () => this.#repeat },
+      fn: { enumerable, get: () => this.#fn }
+    })
   }
 
   #start () {
