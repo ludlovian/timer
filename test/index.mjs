@@ -216,6 +216,20 @@ suite('Timer', async () => {
     }
   })
 
+  test('empty/default construction', async t => {
+    const tm = new Timer()
+    assert.equal(tm.ms, 0)
+    assert.equal(tm.repeat, false)
+    assert.equal(tm.active, false)
+
+    tm.refresh()
+    assert.equal(tm.active, true)
+
+    await delay(5)
+
+    assert.equal(tm.active, false)
+  })
+
   test('update after setting', t => {
     const fn = t.mock.fn()
 
@@ -233,14 +247,6 @@ suite('Timer', async () => {
   })
 
   test('Errors in construction', t => {
-    assert.throws(() => new Timer(), Error, 'No configuration provided')
-
-    assert.throws(
-      () => new Timer({ ms: 10 }),
-      /No function supplied/,
-      'Missing function'
-    )
-
     assert.throws(
       () => new Timer({ ms: 10, fn: 'Function' }),
       /No function supplied/,

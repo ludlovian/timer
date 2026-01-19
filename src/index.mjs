@@ -1,5 +1,7 @@
 const customInspect = Symbol.for('nodejs.util.inspect.custom')
 
+function doNothing () {}
+
 export default class Timer {
   // Configuration
   #tm = null
@@ -26,9 +28,10 @@ export default class Timer {
     every, //     repeated every
     at, //        at a certain time
     inactive //   if set, do not start
-  }) {
+  } = {}) {
     this.cancel()
 
+    // convenience
     if (ms === undefined && repeat === undefined) {
       if (after !== undefined) {
         ms = after
@@ -42,7 +45,14 @@ export default class Timer {
       }
     }
 
+    // null-ish defaults
+    fn ??= doNothing
+    ms ??= 0
+    repeat ??= false
+    inactive ??= fn === doNothing
+
     // validation
+
     if (typeof fn !== 'function') throw errNoFunctionSupplied()
     ms = Math.floor(ms)
     if (isNaN(ms)) throw errInvalidDelay()

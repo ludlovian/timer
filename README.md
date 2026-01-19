@@ -20,6 +20,9 @@ It can also accept the convenience properties:
 - `every`: the `ms` value and sets `repeat` to `true`
 - `at`: sets the `ms` to fire at the given time, with `repeat` set to false
 
+If no configuration is given, an inactive default is created which
+can be re-configured later.
+
 ### .set(config)
 Reconfigures the timer with new settings in the same way as `new Timer`
 
