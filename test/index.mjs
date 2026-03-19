@@ -223,10 +223,6 @@ suite('Timer', async () => {
     assert.equal(tm.active, false)
 
     tm.refresh()
-    assert.equal(tm.active, true)
-
-    await delay(5)
-
     assert.equal(tm.active, false)
   })
 

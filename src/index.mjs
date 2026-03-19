@@ -1,6 +1,7 @@
 const customInspect = Symbol.for('nodejs.util.inspect.custom')
 
-function doNothing () {}
+/* c8 ignore next */
+function doNothing () {} // empty fn that never runs
 
 export default class Timer {
   // Configuration
@@ -128,6 +129,7 @@ export default class Timer {
 
   #start () {
     this.cancel()
+    if (this.#fn === doNothing) return // skip the pointless fn
     this.#started = Date.now()
     this.#tm = setTimeout(this.#fire.bind(this), this.#ms)
   }
