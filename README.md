@@ -65,3 +65,8 @@ When was the timer last started
 Returns a promise which will be resolved on the next timer callback.
 
 If the timer is inactive, then you'll simply get a resolved one.
+
+### .unref() => Timer
+
+If in node and active, unref's the timer. Benign in the browser. 
+Returns itself for chaining.

@@ -118,6 +118,11 @@ export default class Timer {
     return this
   }
 
+  unref () {
+    this.#tm?.unref?.()
+    return this
+  }
+
   #addProperties () {
     const enumerable = true
     Object.defineProperties(this, {
