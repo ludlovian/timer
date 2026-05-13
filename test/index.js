@@ -1,15 +1,15 @@
-import { suite, test } from 'node:test'
+import test from 'node:test'
 import assert from 'node:assert/strict'
 import { setTimeout as delay } from 'node:timers/promises'
 
-import Timer from '../src/index.mjs'
+import Timer from '@ludlovian/timer'
 
 function isClose (a, b, tolerance = 2) {
   return Math.abs(b - a) <= tolerance
 }
 
-suite('Timer', async () => {
-  test('basic construction', () => {
+test('Timer', t => {
+  test('basic construction', t => {
     const fn = () => {}
     const ms = 100
 
@@ -256,7 +256,7 @@ suite('Timer', async () => {
     )
   })
 
-  suite('when', () => {
+  test('when', () => {
     test('basic when on timeout', async t => {
       const fn = t.mock.fn()
       const callback = t.mock.fn()
@@ -342,5 +342,11 @@ suite('Timer', async () => {
         'ready resolved when inactive'
       )
     })
+  })
+
+  test('unref', () => {
+    const tm = new Timer({ after: 10e3, fn: () => {} })
+    tm.unref()
+    // test should end happily
   })
 })

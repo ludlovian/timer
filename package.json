@@ -2,14 +2,14 @@
   "name": "@ludlovian/timer",
   "version": "3.2.2",
   "description": "Simple timer class",
-  "main": "src/index.mjs",
+  "type": "module",
   "exports": {
-    ".": "./src/index.mjs"
+    ".": "./src/index.js"
   },
   "scripts": {
     "clean": "rm -rf coverage/ node_modules/.cache/",
-    "lint": "standard '{src,test}/**/*.mjs'|snazzy",
-    "format": "prettier-standard '{src,test}/**/*.mjs'",
+    "lint": "standard '{src,test}/**/*.js'|snazzy",
+    "format": "prettier-standard '{src,test}/**/*.js'",
     "test": "c8 node --test",
     "coverage": "npm run test && c8 report --reporter=html && sirv coverage/ -p 8000 -H"
   },
